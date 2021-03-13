@@ -35,8 +35,8 @@ jobs:
       
       - name: Setup python packages
         run: |
-          pip3 install -U xlsxwriter,
-          pip3 install -U pyinstaller.
+          pip3 install -U xlsxwriter
+          pip3 install -U pyinstaller
 
       - name: Checkout
         uses: actions/checkout@v2
