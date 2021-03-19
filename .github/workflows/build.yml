@@ -26,7 +26,7 @@ jobs:
         uses: actions/setup-python@v2.2.1
         with:
           # Version range or exact version of a Python version to use, using SemVer's version range syntax.
-          python-version: 3.9.2
+          python-version: 3.x
           # The target architecture (x86, x64) of the Python interpreter.
           architecture: x64
           # Used to pull python distributions from actions/python-versions. Since there's a default, this is typically not supplied by the user.
@@ -49,3 +49,11 @@ jobs:
         with:
           name: CTSVConverter
           path: dist/CTSVConverter.exe
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: dist/CTSVConverter.exe
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
