@@ -60,7 +60,7 @@ def GetNumberType(number):
 
     return numberType
 
-buildInfo = "20210309A"
+buildInfo = "20210621A"
 appName = "CTSV Converter V1.0"
 
 def main():
@@ -113,9 +113,9 @@ def main():
         columnIndex += 1
     print(columnInfo)
 
-    textColumn =  re.findall('[0-9]+', answer("Input Text column index: "))
+    textColumn = re.findall('[0-9]+', answer("Input Text column index: "))
     datetimeColumn = re.findall('[0-9]+', answer("Input Datetime column index: "))
-    numberColumn =  re.findall('[0-9]+', answer("Input Number column index: "))
+    numberColumn = re.findall('[0-9]+', answer("Input Number column index: "))
 
     if len(textColumn): print("Columns " + str(textColumn) + " will trade as text column.")
     if len(datetimeColumn): print("Columns " + str(datetimeColumn) + " will trade as datetime column.")
@@ -131,6 +131,27 @@ def main():
         elif numberColumn.__contains__(str(columnIndex)):
             csvFieldTypeDict[csvFieldName] = "Number"
         columnIndex += 1
+
+    print("============================== Step 4 ==============================")
+    print("Please input sorted index split with ',':")
+
+    columnInfo = ''
+    columnIndex = 0
+    for columnName in csvFieldTypeDict.keys():
+        columnInfo = columnInfo + str(columnIndex) + "." + columnName + (";\n" if columnIndex % 5 == 4 else "; ")
+        columnIndex += 1
+    print(columnInfo)
+
+    sortedColumn = re.findall('[0-9]+', answer("Input sorted column index: "))
+
+    sortedDict = {}
+    csvFieldTypeList = list(csvFieldTypeDict)
+    for sortedIndex in sortedColumn:
+        itemkey = csvFieldTypeList[int(sortedIndex)]
+        sortedDict[itemkey] = csvFieldTypeDict[itemkey]
+        csvFieldTypeDict.pop(itemkey)
+
+    csvFieldTypeDict = sortedDict
 
     print("============================== Converting ==============================")
 
