@@ -61,7 +61,7 @@ def GetNumberType(number):
     return numberType
 
 buildInfo = "20210621A"
-appName = "CTSV Converter V1.0"
+appName = "CTSV Converter V1.1"
 
 def main():
     os.system("title " + appName)
