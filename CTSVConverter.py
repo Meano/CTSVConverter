@@ -151,7 +151,7 @@ def main():
         sortedDict[itemkey] = csvFieldTypeDict[itemkey]
         csvFieldTypeDict.pop(itemkey)
 
-    csvFieldTypeDict = sortedDict
+    csvFieldTypeDict = {**sortedDict, **csvFieldTypeDict}
 
     print("============================== Converting ==============================")
 
