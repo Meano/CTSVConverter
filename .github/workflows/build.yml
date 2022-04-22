@@ -21,29 +21,28 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       - name: Setup Python
-        uses: actions/setup-python@v2.2.1
+        uses: actions/setup-python@v3
         with:
           # Version range or exact version of a Python version to use, using SemVer's version range syntax.
-          python-version: 3.9
+          python-version: '3.10'
           # The target architecture (x86, x64) of the Python interpreter.
           architecture: x64
           # Used to pull python distributions from actions/python-versions. Since there's a default, this is typically not supplied by the user.
           token:  ${{ github.token }} # optional, default is
-          # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      
+
       - name: Setup python packages
         run: |
           pip3 install -U xlsxwriter
           pip3 install -U pyinstaller
 
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Build
         run: pyinstaller -F CTSVConverter.py
 
       - name: Artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: CTSVConverter
           path: dist/CTSVConverter.exe
