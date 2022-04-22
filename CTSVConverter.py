@@ -60,13 +60,48 @@ def GetNumberType(number):
 
     return numberType
 
-buildInfo = "20210621A"
-appName = "CTSV Converter V1.1"
+buildInfo = "20220422A"
+appName = "CTSV Converter V1.2"
+
+encoding = ''
+textColumn = ''
+datetimeColumn = ''
+numberColumn = ''
+sortedColumn = ''
+isKeep = True
+isFirst = True
 
 def main():
     os.system("title " + appName)
     print("Build: " + buildInfo)
     print("Author: Meano&Daisy")
+
+    print("============================== Step 0 ==============================")
+    filePath = ''
+    fileSuffix = ''
+    while not (os.path.exists(filePath) and (os.path.isdir(filePath) or fileSuffix.lower() == ".csv" or fileSuffix.lower() == ".tsv")):
+        filePath = answer("Please input CSV/TSV file or dir path: ").replace("\"", "").replace("\'", "")
+
+    global isKeep
+
+    if not os.path.isdir(filePath):
+        fileSuffix = Path(filePath).suffix
+        ConvertToXlsx(filePath, fileSuffix)
+    else:
+        if answer("If use same config for all files? (`Enter` to keep, any other key to config files every time): ") != '':
+            isKeep = False
+        else:
+            isKeep = True
+
+        for file_walk in os.walk(filePath):
+            for fileInDir in file_walk[2]:
+                fileSuffix = Path(fileInDir).suffix
+                if fileSuffix.lower() == ".csv" or fileSuffix.lower() == ".tsv":
+                    ConvertToXlsx(file_walk[0] + "\\" + fileInDir, fileSuffix)
+
+def ConvertToXlsx(filePath, fileSuffix):
+    print("============================== Step 1 ==============================")
+    print("Converting file: " + filePath + "...")
 
     DatetimeFormatDict = {
         "%Y-%m-%d %H:%M:%S": "yyyy-mm-dd hh:mm:ss",
@@ -74,48 +109,45 @@ def main():
         "%Y-%m-%d": "yyyy-mm-dd",
     }
 
-    print("============================== Step 1 ==============================")
-    filePath = ''
-    fileSuffix = ''
-    while not (os.path.exists(filePath) and (fileSuffix.lower() == ".csv" or fileSuffix.lower() == ".tsv")):
-        filePath = answer("Please input CSV/TSV file path: ").replace("\"", "").replace("\'", "")
-        fileSuffix = Path(filePath).suffix
-
     fileDelimiter = ','
     if fileSuffix.lower() == ".tsv":
         fileDelimiter = '\t'
 
+    global isFirst, isKeep, encoding, textColumn, datetimeColumn, numberColumn, sortedColumn
+
     print("============================== Step 2 ==============================")
-    encoding = ''
-    while encoding == '':
-        print("Please select encoding type of CSV/TSV file:")
-        print("0. UTF-8 (Unicode)")
-        print("1. UTF-8 With BOM (Unicode)")
-        print("2. ISO-8859 (Westen encode)")
-        print("3. GBK (Chinese encode)")
-        print("4. Windows-1252")
-        print("5. UTF-16-LE")
-        try:
-            encodingIndex = int(answer("Please choose encoding type number(0~5): "))
-            encoding = standardEndodings[encodingIndex]
-        except:
-            print(sys.exc_info())
+    if not isKeep or isFirst:
+        encoding = ''
+        while encoding == '':
+            print("Please select encoding type of CSV/TSV file:")
+            print("0. UTF-8 (Unicode)")
+            print("1. UTF-8 With BOM (Unicode)")
+            print("2. ISO-8859 (Westen encode)")
+            print("3. GBK (Chinese encode)")
+            print("4. Windows-1252")
+            print("5. UTF-16-LE")
+            try:
+                encodingIndex = int(answer("Please choose encoding type number(0~5): "))
+                encoding = standardEndodings[encodingIndex]
+            except:
+                print(sys.exc_info())
 
     csvFile = open(filePath, 'r', encoding = encoding)
     csvReader = csv.DictReader(csvFile, delimiter = fileDelimiter)
 
     print("============================== Step 3 ==============================")
-    print("Please input columns format index numbers split with ',':")
-    columnInfo = ''
-    columnIndex = 0
-    for columnName in csvReader.fieldnames:
-        columnInfo = columnInfo + str(columnIndex) + "." + columnName + (";\n" if columnIndex % 5 == 4 else "; ")
-        columnIndex += 1
-    print(columnInfo)
+    if not isKeep or isFirst:
+        print("Please input columns format index numbers split with ',':")
+        columnInfo = ''
+        columnIndex = 0
+        for columnName in csvReader.fieldnames:
+            columnInfo = columnInfo + str(columnIndex) + "." + columnName + (";\n" if columnIndex % 5 == 4 else "; ")
+            columnIndex += 1
+        print(columnInfo)
 
-    textColumn = re.findall('[0-9]+', answer("Input Text column index: "))
-    datetimeColumn = re.findall('[0-9]+', answer("Input Datetime column index: "))
-    numberColumn = re.findall('[0-9]+', answer("Input Number column index: "))
+        textColumn = re.findall('[0-9]+', answer("Input Text column index: "))
+        datetimeColumn = re.findall('[0-9]+', answer("Input Datetime column index: "))
+        numberColumn = re.findall('[0-9]+', answer("Input Number column index: "))
 
     if len(textColumn): print("Columns " + str(textColumn) + " will trade as text column.")
     if len(datetimeColumn): print("Columns " + str(datetimeColumn) + " will trade as datetime column.")
@@ -133,16 +165,19 @@ def main():
         columnIndex += 1
 
     print("============================== Step 4 ==============================")
-    print("Please input sorted index split with ',':")
+    if not isKeep or isFirst:
+        print("Please input sorted index split with ',':")
 
-    columnInfo = ''
-    columnIndex = 0
-    for columnName in csvFieldTypeDict.keys():
-        columnInfo = columnInfo + str(columnIndex) + "." + columnName + (";\n" if columnIndex % 5 == 4 else "; ")
-        columnIndex += 1
-    print(columnInfo)
+        columnInfo = ''
+        columnIndex = 0
+        for columnName in csvFieldTypeDict.keys():
+            columnInfo = columnInfo + str(columnIndex) + "." + columnName + (";\n" if columnIndex % 5 == 4 else "; ")
+            columnIndex += 1
+        print(columnInfo)
 
-    sortedColumn = re.findall('[0-9]+', answer("Input sorted column index: "))
+        sortedColumn = re.findall('[0-9]+', answer("Input sorted column index: "))
+
+        isFirst = False
 
     sortedDict = {}
     csvFieldTypeList = list(csvFieldTypeDict)
