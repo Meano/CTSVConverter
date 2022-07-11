@@ -60,32 +60,35 @@ def GetNumberType(number):
 
     return numberType
 
-buildInfo = "20220422A"
-appName = "CTSV Converter V1.2"
+buildInfo = "20220711A"
+appName = "CTSV Converter V1.2.1"
 
 encoding = ''
 textColumn = ''
 datetimeColumn = ''
 numberColumn = ''
 sortedColumn = ''
-isKeep = True
+isKeep = False
 isFirst = True
 
 def main():
     os.system("title " + appName)
     print("Build: " + buildInfo)
     print("Author: Meano&Daisy")
+    print("Press Ctrl + C to exit")
 
     print("============================== Step 0 ==============================")
     filePath = ''
     fileSuffix = ''
     while not (os.path.exists(filePath) and (os.path.isdir(filePath) or fileSuffix.lower() == ".csv" or fileSuffix.lower() == ".tsv")):
         filePath = answer("Please input CSV/TSV file or dir path: ").replace("\"", "").replace("\'", "")
+        fileSuffix = Path(filePath).suffix
 
-    global isKeep
+    global isKeep, isFirst
+    isKeep = False
+    isFirst = True
 
     if not os.path.isdir(filePath):
-        fileSuffix = Path(filePath).suffix
         ConvertToXlsx(filePath, fileSuffix)
     else:
         if answer("If use same config for all files? (`Enter` to keep, any other key to config files every time): ") != '':
@@ -260,6 +263,8 @@ if __name__ == '__main__':
     try:
         while True:
             main()
+    except KeyboardInterrupt:
+        print("Exit!")
     except Exception as e:
         print(e)
         os.system("pause")
