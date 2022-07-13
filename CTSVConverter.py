@@ -60,8 +60,8 @@ def GetNumberType(number):
 
     return numberType
 
-buildInfo = "20220711A"
-appName = "CTSV Converter V1.2.1"
+buildInfo = "20220713A"
+appName = "CTSV Converter V1.3"
 
 encoding = ''
 textColumn = ''
@@ -140,7 +140,7 @@ def ConvertToXlsx(filePath, fileSuffix):
 
     print("============================== Step 3 ==============================")
     if not isKeep or isFirst:
-        print("Please input columns format index numbers split with ',':")
+        print("Please input columns format index numbers or names split with ',':")
         columnInfo = ''
         columnIndex = 0
         for columnName in csvReader.fieldnames:
@@ -148,9 +148,18 @@ def ConvertToXlsx(filePath, fileSuffix):
             columnIndex += 1
         print(columnInfo)
 
-        textColumn = re.findall('[0-9]+', answer("Input Text column index: "))
-        datetimeColumn = re.findall('[0-9]+', answer("Input Datetime column index: "))
-        numberColumn = re.findall('[0-9]+', answer("Input Number column index: "))
+        textColumn = answer("Input Text column index / name: ")
+        datetimeColumn = answer("Input Datetime column index / name: ")
+        numberColumn = answer("Input Number column index / name: ")
+
+        for columnIndex, columnName in enumerate(csvReader.fieldnames):
+            textColumn = textColumn.replace(columnName, str(columnIndex))
+            datetimeColumn = datetimeColumn.replace(columnName, str(columnIndex))
+            numberColumn = numberColumn.replace(columnName, str(columnIndex))
+
+        textColumn = re.findall('[0-9]+', textColumn)
+        datetimeColumn = re.findall('[0-9]+', datetimeColumn)
+        numberColumn = re.findall('[0-9]+', numberColumn)
 
     if len(textColumn): print("Columns " + str(textColumn) + " will trade as text column.")
     if len(datetimeColumn): print("Columns " + str(datetimeColumn) + " will trade as datetime column.")
