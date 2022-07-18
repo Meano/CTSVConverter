@@ -60,14 +60,14 @@ def GetNumberType(number):
 
     return numberType
 
-buildInfo = "20220713A"
-appName = "CTSV Converter V1.3"
+buildInfo = "20220718B"
+appName = "CTSV Converter V1.3.1"
 
 encoding = ''
-textColumn = ''
-datetimeColumn = ''
-numberColumn = ''
-sortedColumn = ''
+inputTextColumn = ''
+inputDatetimeColumn = ''
+inputNumberColumn = ''
+inputSortedColumn = ''
 isKeep = False
 isFirst = True
 
@@ -116,7 +116,7 @@ def ConvertToXlsx(filePath, fileSuffix):
     if fileSuffix.lower() == ".tsv":
         fileDelimiter = '\t'
 
-    global isFirst, isKeep, encoding, textColumn, datetimeColumn, numberColumn, sortedColumn
+    global isFirst, isKeep, encoding, inputTextColumn, inputDatetimeColumn, inputNumberColumn, inputSortedColumn
 
     print("============================== Step 2 ==============================")
     if not isKeep or isFirst:
@@ -148,18 +148,22 @@ def ConvertToXlsx(filePath, fileSuffix):
             columnIndex += 1
         print(columnInfo)
 
-        textColumn = answer("Input Text column index / name: ")
-        datetimeColumn = answer("Input Datetime column index / name: ")
-        numberColumn = answer("Input Number column index / name: ")
+        inputTextColumn = answer("Input Text column index / name: ")
+        inputDatetimeColumn = answer("Input Datetime column index / name: ")
+        inputNumberColumn = answer("Input Number column index / name: ")
 
-        for columnIndex, columnName in enumerate(csvReader.fieldnames):
-            textColumn = textColumn.replace(columnName, str(columnIndex))
-            datetimeColumn = datetimeColumn.replace(columnName, str(columnIndex))
-            numberColumn = numberColumn.replace(columnName, str(columnIndex))
+    textColumn = inputTextColumn
+    datetimeColumn = inputDatetimeColumn
+    numberColumn = inputNumberColumn
 
-        textColumn = re.findall('[0-9]+', textColumn)
-        datetimeColumn = re.findall('[0-9]+', datetimeColumn)
-        numberColumn = re.findall('[0-9]+', numberColumn)
+    for columnIndex, columnName in enumerate(csvReader.fieldnames):
+        textColumn = textColumn.replace(columnName, str(columnIndex))
+        datetimeColumn = datetimeColumn.replace(columnName, str(columnIndex))
+        numberColumn = numberColumn.replace(columnName, str(columnIndex))
+
+    textColumn = re.findall('[0-9]+', textColumn)
+    datetimeColumn = re.findall('[0-9]+', datetimeColumn)
+    numberColumn = re.findall('[0-9]+', numberColumn)
 
     if len(textColumn): print("Columns " + str(textColumn) + " will trade as text column.")
     if len(datetimeColumn): print("Columns " + str(datetimeColumn) + " will trade as datetime column.")
@@ -187,9 +191,16 @@ def ConvertToXlsx(filePath, fileSuffix):
             columnIndex += 1
         print(columnInfo)
 
-        sortedColumn = re.findall('[0-9]+', answer("Input sorted column index: "))
+        inputSortedColumn = answer("Input sorted column index / name: ")
 
         isFirst = False
+
+    sortedColumn = inputSortedColumn
+
+    for columnIndex, columnName in enumerate(csvFieldTypeDict.keys()):
+        sortedColumn = sortedColumn.replace(columnName, str(columnIndex))
+
+    sortedColumn = re.findall('[0-9]+', sortedColumn)
 
     sortedDict = {}
     csvFieldTypeList = list(csvFieldTypeDict)
