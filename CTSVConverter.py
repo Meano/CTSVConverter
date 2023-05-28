@@ -7,6 +7,8 @@ import datetime
 import csv
 import re
 from pathlib import Path
+from openpyxl import load_workbook
+import openpyxl
 
 try:
     import xlsxwriter
@@ -60,8 +62,8 @@ def GetNumberType(number):
 
     return numberType
 
-buildInfo = "20220718B"
-appName = "CTSV Converter V1.3.1"
+buildInfo = "20230528A"
+appName = "CTSV Converter V1.4.0"
 
 encoding = ''
 inputTextColumn = ''
@@ -80,9 +82,21 @@ def main():
     print("============================== Step 0 ==============================")
     filePath = ''
     fileSuffix = ''
-    while not (os.path.exists(filePath) and (os.path.isdir(filePath) or fileSuffix.lower() == ".csv" or fileSuffix.lower() == ".tsv")):
-        filePath = answer("Please input CSV/TSV file or dir path: ").replace("\"", "").replace("\'", "")
-        fileSuffix = Path(filePath).suffix
+    while not (
+        os.path.exists(filePath) and
+        (
+            os.path.isdir(filePath) or
+            fileSuffix.lower() == ".csv" or
+            fileSuffix.lower() == ".tsv" or
+            fileSuffix.lower() == ".xlsx"
+        )
+    ):
+        filePath = answer("Please input CSV/TSV/XLSX file or dir path: ").replace("\"", "").replace("\'", "")
+        fileSuffix = Path(filePath).suffix.lower()
+
+    if fileSuffix == ".xlsx":
+        ConvertToCTSV(filePath, fileSuffix)
+        return
 
     global isKeep, isFirst
     isKeep = False
@@ -276,6 +290,40 @@ def ConvertToXlsx(filePath, fileSuffix):
             print("Appended rows " + str(rowIndex))
     print("Appended all rows " + str(rowIndex))
     workbook.close()
+
+    print("============================== Convert done ==============================\n\n")
+
+def ConvertToCTSV(filePath, fileSuffix):
+    print("============================== Step 1 ==============================")
+    print("Converting file: " + filePath + "...")
+    print("Please select file format to convert:")
+    print("0. CSV")
+    print("1. TSV")
+    try:
+        formatIndex = int(answer("Please choose file format number(0/1): "))
+        if formatIndex == 0:
+            targetFileSuffix = ".csv"
+        else:
+            targetFileSuffix = ".tsv"
+    except:
+        print(sys.exc_info())
+
+    fileDelimiter = ','
+    if targetFileSuffix == ".tsv":
+        fileDelimiter = '\t'
+
+    print("============================== Converting ==============================")
+    workbook = load_workbook(filePath)
+
+    for sheetname in workbook.sheetnames:
+        sheet = workbook[sheetname]
+        ctsvPath = filePath.replace(fileSuffix, "-" + sheetname + targetFileSuffix)
+        print("Will convert sheet " + sheetname + " to: " + ctsvPath)
+        with open(ctsvPath, "w", encoding = "utf8", newline='') as ctsvFile:
+            csvWriter = csv.writer(ctsvFile, delimiter = fileDelimiter)
+            for row in sheet.rows:
+                csvWriter.writerow([cell.value for cell in row])
+            ctsvFile.close()
 
     print("============================== Convert done ==============================\n\n")
 
